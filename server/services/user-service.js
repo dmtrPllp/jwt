@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const tokenService = require('../services/token-service');
 const mailService = require('../services/mail-service');
 const UserDto = require('../dto/user-dto');
-
+const uuid = require('uuid');
 
 class UserService {
     async registration(email, password) {
@@ -14,10 +14,10 @@ class UserService {
         const hashpassword = await bcrypt.hash(password, 3);
         const activationLink = uuid.v4();
         const user = await UserModel.create({ email, password: hashpassword })
-        await mailService.sendActivationMail(email, activationLink);
-        
+        await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
+
         const userDto = new UserDto(user);
-        const tokens = tokenService.generateTokens({...userDto});
+        const tokens = tokenService.generateTokens({ ...userDto });
         await tokenService.saveToken(userDto.id, tokens.refreshToken);
         return {
             ...tokens,
