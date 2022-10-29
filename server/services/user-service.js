@@ -16,14 +16,7 @@ class UserService {
         const activationLink = uuid.v4();
         const user = await UserModel.create({ email, password: hashpassword, activationLink })
         await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
-
-        const userDto = new UserDto(user);
-        const tokens = tokenService.generateTokens({ ...userDto });
-        await tokenService.saveToken(userDto.id, tokens.refreshToken);
-        return {
-            ...tokens,
-            user: userDto
-        }
+        return await this.generateTokensForUserDto(user);
     }
 
     async activate(activationLink) {
@@ -34,6 +27,29 @@ class UserService {
         user.isActivated = true;
         await user.save();
     }
+
+    async login(email, password) {
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} не существует!`);
+        }
+        if (!(await bcrypt.compare(password, user.password))) {
+            throw ApiError.BadRequest(`Неверный пароль`);
+        }
+        return await this.generateTokensForUserDto(user);
+    }
+
+    async generateTokensForUserDto(user) {
+        const userDto = new UserDto(user);
+        const tokens = tokenService.generateTokens({ ...userDto });
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
+        return {
+            ...tokens,
+            user: userDto
+        }
+    }
 }
+
+
 
 module.exports = new UserService();
