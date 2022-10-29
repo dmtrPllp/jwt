@@ -14,7 +14,7 @@ class UserController {
             return res.json(userData);
         }
         catch (e) {
-            console.log(e);
+            next(e);
         }
     }
     async login(req, res, next) {
@@ -22,7 +22,7 @@ class UserController {
 
         }
         catch (e) {
-
+            next(e);
         }
     }
     async logout(req, res, next) {
@@ -30,7 +30,7 @@ class UserController {
 
         }
         catch (e) {
-
+            next(e);
         }
     }
     async activate(req, res, next) {
@@ -40,7 +40,7 @@ class UserController {
             return res.redirect(process.env.CLIENT_URL);
         }
         catch (e) {
-            console.log(e);
+            next(e);
         }
     }
     async refresh(req, res, next) {
@@ -48,7 +48,7 @@ class UserController {
 
         }
         catch (e) {
-
+            next(e);
         }
     }
     async getUsers(req, res, next) {
@@ -56,7 +56,7 @@ class UserController {
             res.json(['123', '456']);
         }
         catch (e) {
-
+            next(e);
         }
     }
 }
